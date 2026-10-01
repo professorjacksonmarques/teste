@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JVM Eletrônicos - Tecnologia, informática, componentes e acessórios.">
+  <title>JVM Eletrônicos</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  >
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="main.js" defer></script>
+</head>
+
+<body>
+  <!-- Barra superior -->
+  <div class="topbar">
+    <div class="container d-flex flex-wrap justify-content-center justify-content-md-between gap-2">
+      <span><i class="bi bi-shield-check me-1"></i> Compra segura</span>
+      <span><i class="bi bi-box-seam me-1"></i> Produtos selecionados</span>
+      <span><i class="bi bi-headset me-1"></i> Atendimento JVM Eletrônicos</span>
+    </div>
+  </div>
+
+  <!-- Cabeçalho -->
+  <header class="main-header sticky-top">
+    <div class="container">
+      <div class="header-grid">
+        <a href="index.html" class="brand" aria-label="JVM Eletrônicos - Página inicial">
+          <span class="brand-symbol">JVM</span>
+          <span class="brand-name">ELETRÔNICOS</span>
+        </a>
+
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input
+            type="search"
+            id="busca"
+            placeholder="O que você está procurando?"
+            aria-label="Buscar produtos"
+          >
+        </div>
+
+        <div class="header-actions">
+          <button class="header-action d-none" id="btn-admin" type="button">
+            <i class="bi bi-speedometer2"></i>
+            <span>Admin</span>
+          </button>
+
+          <button class="header-action" id="btn-login" type="button">
+            <i class="bi bi-person-circle"></i>
+            <span id="texto-login">Entrar</span>
+          </button>
+
+          <button class="header-action d-none" id="btn-logout" type="button">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Sair</span>
+          </button>
+
+          <button
+            class="header-action cart-button"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#cartOffcanvas"
+            aria-controls="cartOffcanvas"
+          >
+            <i class="bi bi-cart3"></i>
+            <span>Carrinho</span>
+            <span class="cart-count" id="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegação por categorias -->
+  <nav class="category-bar" aria-label="Categorias">
+    <div class="container">
+      <div id="category-nav" class="category-nav">
+        <button class="category-link active" data-category="todos" type="button">
+          <i class="bi bi-grid"></i> Todos
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Banner -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-card">
+          <img
+            src="logo-jvm.png"
+            alt="JVM Eletrônicos"
+            class="hero-image"
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefícios -->
+    <section class="container benefits-section">
+      <div class="benefit-card">
+        <i class="bi bi-lightning-charge"></i>
+        <div>
+          <strong>Tecnologia para você</strong>
+          <span>Eletrônicos, informática e acessórios.</span>
+        </div>
+      </div>
+
+      <div class="benefit-card">
+        <i class="bi bi-shield-lock"></i>
+        <div>
+          <strong>Ambiente seguro</strong>
+          <span>Acesso e pedidos registrados com Firebase.</span>
+        </div>
+      </div>
+
+      <div class="benefit-card">
+        <i class="bi bi-bag-check"></i>
+        <div>
+          <strong>Estoque atualizado</strong>
+          <span>Veja a disponibilidade de cada produto.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Produtos -->
+    <section class="products-section">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">JVM ELETRÔNICOS</span>
+            <h1 id="titulo-produtos">Ofertas e destaques</h1>
+            <p>Encontre produtos de tecnologia cadastrados em nossa loja.</p>
+          </div>
+
+          <div class="sort-box">
+            <label for="ordenacao">Ordenar por</label>
+            <select id="ordenacao" class="form-select">
+              <option value="relevancia">Relevância</option>
+              <option value="menor-preco">Menor preço</option>
+              <option value="maior-preco">Maior preço</option>
+              <option value="nome">Nome</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="mensagem-produtos" class="store-message d-none"></div>
+
+        <div
+          id="produtos"
+          class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4"
+        ></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Carrinho lateral -->
+  <div
+    class="offcanvas offcanvas-end cart-offcanvas"
+    tabindex="-1"
+    id="cartOffcanvas"
+    aria-labelledby="cartOffcanvasLabel"
+  >
+    <div class="offcanvas-header">
+      <div>
+        <span class="section-kicker">SEU PEDIDO</span>
+        <h2 class="offcanvas-title" id="cartOffcanvasLabel">Meu Carrinho</h2>
+      </div>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="offcanvas"
+        aria-label="Fechar"
+      ></button>
+    </div>
+
+    <div class="offcanvas-body d-flex flex-column">
+      <div id="carrinho" class="cart-items"></div>
+
+      <div class="cart-summary mt-auto">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span>Subtotal</span>
+          <strong id="cart-subtotal">R$ 0,00</strong>
+        </div>
+        <button class="btn btn-jvm w-100" id="btn-finalizar" type="button">
+          Finalizar compra
+        </button>
+        <small class="d-block text-center mt-2">
+          A finalização atual registra o pedido no Firebase.
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login e cadastro -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content login-modal">
+        <div class="modal-header">
+          <div>
+            <span class="section-kicker">MINHA CONTA</span>
+            <h2 class="modal-title fs-4">Acesso à JVM Eletrônicos</h2>
+          </div>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Fechar"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <h3 class="login-subtitle">Já tenho cadastro</h3>
+          <input
+            class="form-control mb-2"
+            id="email"
+            placeholder="E-mail"
+            type="email"
+            autocomplete="email"
+          >
+          <input
+            class="form-control mb-3"
+            id="senha"
+            placeholder="Senha"
+            type="password"
+            autocomplete="current-password"
+          >
+          <button class="btn btn-jvm w-100" id="btn-entrar-modal" type="button">
+            Entrar
+          </button>
+
+          <div class="login-divider">
+            <span>ou</span>
+          </div>
+
+          <h3 class="login-subtitle">Criar minha conta</h3>
+          <input
+            class="form-control mb-2"
+            id="emailCadastro"
+            placeholder="Seu e-mail"
+            type="email"
+            autocomplete="email"
+          >
+          <input
+            class="form-control mb-3"
+            id="senhaCadastro"
+            placeholder="Crie uma senha"
+            type="password"
+            autocomplete="new-password"
+          >
+          <button class="btn btn-outline-jvm w-100" id="btn-cadastrar" type="button">
+            Criar conta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="footer-brand">JVM <span>ELETRÔNICOS</span></div>
+          <p>
+            Tecnologia, informática, componentes e acessórios em uma experiência
+            de compra simples e moderna.
+          </p>
+        </div>
+
+        <div class="col-6 col-lg-3">
+          <h3>Loja</h3>
+          <a href="#produtos">Produtos</a>
+          <a href="#produtos">Ofertas</a>
+          <a href="#produtos">Categorias</a>
+        </div>
+
+        <div class="col-6 col-lg-4">
+          <h3>Atendimento</h3>
+          <p class="mb-1">JVM Eletrônicos</p>
+          <p class="mb-0">Consulte as condições antes de finalizar seu pedido.</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="ano-atual"></span> JVM Eletrônicos. Todos os direitos reservados.</span>
+        <span>Firebase + GitHub Pages</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
